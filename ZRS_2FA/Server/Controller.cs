@@ -55,7 +55,7 @@ namespace Server
             return so.Result;
         }
 
-        public bool EnableTwoFaConfirm(long userId, string code)
+        public List<string> EnableTwoFaConfirm(long userId, string code)
         {
             EnableTwoFaConfirmSO so = new(userId, code);
             so.ExecuteTemplate();
@@ -64,7 +64,7 @@ namespace Server
 
         public LoginResult LoginSecondStep(Credentials c)
         {
-            LoginSecondStep so = new(c);
+            LoginSecondStepSO so = new(c);
             so.ExecuteTemplate();
             switch (so.Result)
             {
@@ -72,6 +72,24 @@ namespace Server
                     break;
                 case LoginResult.WrongTwoFactorCode:
                     throw new InvalidOperationException("Wrong two-factor code!");
+                case LoginResult.InTimeout:
+                    throw new InvalidOperationException("Too many failed attempts, try again later.");
+                default:
+                    break;
+            }
+            return so.Result;
+        }
+
+        public LoginResult LoginBackupCode(Credentials c)
+        {
+            LoginBackupCodeSO so = new(c);
+            so.ExecuteTemplate();
+            switch (so.Result)
+            {
+                case LoginResult.SuccessTwoFa:
+                    break;
+                case LoginResult.WrongTwoFactorCode:
+                    throw new InvalidOperationException("Wrong backup code!");
                 case LoginResult.InTimeout:
                     throw new InvalidOperationException("Too many failed attempts, try again later.");
                 default:

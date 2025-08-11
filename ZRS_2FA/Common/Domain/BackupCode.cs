@@ -17,8 +17,8 @@ namespace Common.Domain
         public string GetInsertColumns() => "UserId, Code, IsUsed";
         public Dictionary<string, object?> GetInsertValues() => new()
         {
-            {"@Code", Code},
             {"@UserId", UserId},
+            {"@Code", Code},
             {"@IsUsed", IsUsed}
         };
         public BackupCode ReadFromReader(SqlDataReader reader)

@@ -10,11 +10,11 @@ using Server.SystemOperations.Utils;
 
 namespace Server.SystemOperations
 {
-    public class LoginSecondStep : SystemOperationBase
+    public class LoginSecondStepSO : SystemOperationBase
     {
         public LoginResult Result { get; set; }
         public Credentials Credentials { get; set; }
-        public LoginSecondStep(Credentials c)
+        public LoginSecondStepSO(Credentials c)
         {
             Credentials = c;
         }

@@ -114,6 +114,32 @@ namespace DBBroker
             cmd.ExecuteNonQuery();
         }
 
+        public List<string> GetBackupCodes(long userId)
+        {
+            List<string> codes = [];
+            string cmdText = "SELECT Code FROM BackupCodes WHERE UserId = @UserId AND IsUsed = 0";
+            using SqlCommand cmd = _dbConnection.CreateCommand(cmdText);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            using SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                if (!reader.IsDBNull(0))
+                {
+                    codes.Add(reader.GetString(0));
+                }
+            }
+            return codes;
+        }
+
+        public void SetBackupCodeUsed(long userId, string code)
+        {
+            const string cmdText = "UPDATE BackupCodes SET IsUsed = 1 WHERE UserId = @UserId AND Code = @Code";
+            using SqlCommand cmd = _dbConnection.CreateCommand(cmdText);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.Parameters.AddWithValue("@Code", code);
+            cmd.ExecuteNonQuery();
+        }
+
         public void Insert(IEntity e)
         {
             string keys = string.Join(", ", e.GetInsertValues().Keys);

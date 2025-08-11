@@ -98,9 +98,10 @@ namespace Client.GuiController
             }
             if(result == LoginResult.SuccessTwoFa)
             {
-                MessageBox.Show("Login successful!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 _authenticationForm.TxtCode.Clear();
                 _authenticationForm.Close();
+                _authenticationForm.Dispose();
+                MessageBox.Show("Login successful!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 SwitchToMainForm(LoginResult.SuccessTwoFa);
             }
             else
@@ -127,7 +128,25 @@ namespace Client.GuiController
                 MessageBox.Show("Please enter backup code.", "Input Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            // Handle backup code login logic here
+            (string? err, LoginResult result) = await Communication.Instance.LoginBackupCode(Username, backupCode);
+            if (err != null)
+            {
+                MessageBox.Show($"Login failed: {err}", "Login Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (result == LoginResult.SuccessTwoFa)
+            {
+                _authenticationForm.TxtBackup.Clear();
+                _authenticationForm.Close();
+                _authenticationForm.Dispose();
+                MessageBox.Show("Login successful!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                SwitchToMainForm(LoginResult.SuccessBackup);
+            }
+            else
+            {
+                MessageBox.Show("Unexpected error. Please check your code and try again.", "Login Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
 
@@ -152,7 +171,7 @@ namespace Client.GuiController
         {
             _form.Hide();
             _authenticationForm = new();
-            _authenticationForm.ShowDialog();
+            _authenticationForm.ShowDialog(_form);
             _form.Show();
         }
     }

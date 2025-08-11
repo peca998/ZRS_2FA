@@ -51,5 +51,20 @@ namespace Common.Security
             bool isValid = totp.VerifyTotp(enteredCode, out long timeStepMatched, new VerificationWindow(2, 2));
             return isValid;
         }
+
+        public static (List<string> plain, List<string> hashed) 
+            GenerateRecoveryCodes(string salt, int count = 10, int length = 8)
+        {
+            List<string> hashedCodes = [];
+            List<string> plainCodes = [];
+            for (int i = 0; i < count; i++)
+            {
+                string code = GenerateSecret(length);
+                plainCodes.Add(code);
+                var (_, hash) = PasswordHasher.HashCode(code, salt);
+                hashedCodes.Add(hash);
+            }
+            return (plainCodes, hashedCodes);
+        }
     }
 }

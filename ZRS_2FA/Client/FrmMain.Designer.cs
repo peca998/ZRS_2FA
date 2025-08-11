@@ -34,6 +34,8 @@
             lblEnterCode = new Label();
             btnOk = new Button();
             txtCode = new TextBox();
+            rtxtBackupCodes = new RichTextBox();
+            lblBackupCodes = new Label();
             ((System.ComponentModel.ISupportInitialize)pbQr).BeginInit();
             pnlVerify.SuspendLayout();
             SuspendLayout();
@@ -92,11 +94,31 @@
             txtCode.Size = new Size(125, 27);
             txtCode.TabIndex = 0;
             // 
+            // rtxtBackupCodes
+            // 
+            rtxtBackupCodes.Location = new Point(104, 133);
+            rtxtBackupCodes.Name = "rtxtBackupCodes";
+            rtxtBackupCodes.Size = new Size(250, 120);
+            rtxtBackupCodes.TabIndex = 3;
+            rtxtBackupCodes.Text = "";
+            // 
+            // lblBackupCodes
+            // 
+            lblBackupCodes.AutoSize = true;
+            lblBackupCodes.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblBackupCodes.Location = new Point(140, 110);
+            lblBackupCodes.Name = "lblBackupCodes";
+            lblBackupCodes.Size = new Size(179, 20);
+            lblBackupCodes.TabIndex = 4;
+            lblBackupCodes.Text = "Save your backup codes:";
+            // 
             // FrmMain
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(464, 433);
+            Controls.Add(lblBackupCodes);
+            Controls.Add(rtxtBackupCodes);
             Controls.Add(pnlVerify);
             Controls.Add(pbQr);
             Controls.Add(btnEnableTwoFa);
@@ -106,6 +128,7 @@
             pnlVerify.ResumeLayout(false);
             pnlVerify.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -116,6 +139,8 @@
         private Label lblEnterCode;
         private Button btnOk;
         private TextBox txtCode;
+        private RichTextBox rtxtBackupCodes;
+        private Label lblBackupCodes;
 
         public Button BtnEnableTwoFa { get => btnEnableTwoFa; set => btnEnableTwoFa = value; }
         public PictureBox PbQr { get => pbQr; set => pbQr = value; }
@@ -123,5 +148,7 @@
         public Label LblEnterCode { get => lblEnterCode; set => lblEnterCode = value; }
         public Button BtnOk { get => btnOk; set => btnOk = value; }
         public TextBox TxtCode { get => txtCode; set => txtCode = value; }
+        public RichTextBox RtxtBackupCodes { get => rtxtBackupCodes; set => rtxtBackupCodes = value; }
+        public Label LblBackupCodes { get => lblBackupCodes; set => lblBackupCodes = value; }
     }
 }

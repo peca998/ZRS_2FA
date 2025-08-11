@@ -33,7 +33,6 @@ namespace Server
             {
                 while (_client.Connected && !cancellationToken.IsCancellationRequested)
                 {
-                    // You might want to check if data is available or wrap ReceiveAsync with timeout/cancellation support
                     var receiveTask = _serializer.ReceiveAsync<Request>();
                     var completedTask = await Task.WhenAny(receiveTask, Task.Delay(-1, cancellationToken));
 
@@ -121,6 +120,7 @@ namespace Server
                         response.Result = Controller.Instance.LoginSecondStep(_serializer.ReadType<Credentials>(request.Argument));
                         break;
                     case Operation.UseBackupCode:
+                        response.Result = Controller.Instance.LoginBackupCode(_serializer.ReadType<Credentials>(request.Argument));
                         break;
                     default:
                         break;

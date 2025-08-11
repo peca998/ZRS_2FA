@@ -23,7 +23,7 @@ namespace Server.SystemOperations
                 throw new InvalidOperationException("Username already exists.");
             }
 
-            var hashes = PasswordHasher.HashPassword(Credentials.Password);
+            var hashes = PasswordHasher.HashCode(Credentials.Password);
             User user = new User
             {
                 Username = Credentials.Username,

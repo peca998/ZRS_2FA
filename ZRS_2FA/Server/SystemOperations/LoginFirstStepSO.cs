@@ -44,7 +44,7 @@ namespace Server.SystemOperations
                 return;
             }
 
-            if (!PasswordHasher.VerifyPassword(Credentials.Password, existingUser.Salt, existingUser.HashedPassword))
+            if (!PasswordHasher.VerifyCode(Credentials.Password, existingUser.Salt, existingUser.HashedPassword))
             {
                 Result.LoginResult = LoginResult.WrongPassword;
                 _broker.Insert(attempt);

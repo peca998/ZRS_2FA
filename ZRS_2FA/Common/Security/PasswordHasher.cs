@@ -13,31 +13,39 @@ namespace Common.Security
         private const int HashSize = 32; // Size of the hash in bytes
         private const int Iterations = 10000; // Number of iterations for PBKDF2
 
-        // we call this when user registers
-        public static (string Salt, string Hash) HashPassword(string password)
+        public static (string Salt, string Hash) HashCode(string password, string? existingSalt = null)
         {
-            // generate a random salt
-            byte[] salt = new byte[SaltSize];
-            using (var rng = RandomNumberGenerator.Create())
+            byte[] saltBytes;
+
+            if (string.IsNullOrEmpty(existingSalt))
             {
-                rng.GetBytes(salt);
+                // generate a random salt
+                saltBytes = new byte[SaltSize];
+                using var rng = RandomNumberGenerator.Create();
+                rng.GetBytes(saltBytes);
+            }
+            else
+            {
+                // use provided salt
+                saltBytes = Convert.FromBase64String(existingSalt);
             }
 
-            // hash the password with the salt using PBKDF2
-            using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, Iterations, HashAlgorithmName.SHA256);
+            // hash the password (or backup code) with the salt using PBKDF2
+            using var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, Iterations, HashAlgorithmName.SHA256);
             byte[] hash = pbkdf2.GetBytes(HashSize);
-            // convert the salt and hash to base64 strings for storage
-            return (Convert.ToBase64String(salt), Convert.ToBase64String(hash));
 
+            // return salt and hash (salt will be the same as passed in if provided)
+            return (Convert.ToBase64String(saltBytes), Convert.ToBase64String(hash));
         }
 
+
         // we call this when user logs in
-        public static bool VerifyPassword(string enteredPassword, string storedSalt, string storedHash)
+        public static bool VerifyCode(string enteredCode, string storedSalt, string storedHash)
         {
             byte[] salt = Convert.FromBase64String(storedSalt);
             byte[] hash = Convert.FromBase64String(storedHash);
 
-            using var pbkdf2 = new Rfc2898DeriveBytes(enteredPassword, salt, Iterations, HashAlgorithmName.SHA256);
+            using var pbkdf2 = new Rfc2898DeriveBytes(enteredCode, salt, Iterations, HashAlgorithmName.SHA256);
             byte[] computedHash = pbkdf2.GetBytes(HashSize);
             // compare the computed hash with the stored hash
             //return computedHash.SequenceEqual(hash); -- not secure enough, use a constant time comparison

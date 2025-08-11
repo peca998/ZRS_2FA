@@ -30,6 +30,8 @@ namespace Client.GuiController
                     _form.BtnEnableTwoFa.Text = "2FA Enabled";
                     break;
                 case LoginResult.SuccessBackup:
+                    _form.BtnEnableTwoFa.Enabled = false;
+                    _form.BtnEnableTwoFa.Text = "2FA Enabled";
                     break;
                 default:
                     break;
@@ -63,15 +65,19 @@ namespace Client.GuiController
                 MessageBox.Show("Please enter all 6 digits", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            bool result = await Communication.Instance.EnableTwoFaConfirm(code);
-            if (result)
+            List<string> result = await Communication.Instance.EnableTwoFaConfirm(code);
+            if (result.Count > 0)
             {
                 MessageBox.Show("2FA enabled successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 _form.PnlVerify.Visible = false;
                 _form.PbQr.Image = null;
+                _form.PbQr.Visible = false;
                 _form.TxtCode.Clear();
                 _form.BtnEnableTwoFa.Enabled = false;
                 _form.BtnEnableTwoFa.Text = "2FA Enabled";
+                _form.LblBackupCodes.Visible = true;
+                _form.RtxtBackupCodes.Visible = true;
+                _form.RtxtBackupCodes.Lines = [.. result];
             }
             else
             {
