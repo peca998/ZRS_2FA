@@ -16,7 +16,7 @@ namespace Server
         private JsonNetworkSerializer _serializer;
         private readonly TcpClient _client;
         private readonly Server _server;
-        private string Username { get; set; } = string.Empty;
+        public long UserId { get; set; } = -1;
         public Task? RunningTask { get; set; }
 
 
@@ -107,11 +107,18 @@ namespace Server
                         Controller.Instance.Register(_serializer.ReadType<Credentials>(request.Argument));
                         break;
                     case Operation.LoginFirstStep:
-                        response.Result = Controller.Instance.LoginFirstStep(_serializer.ReadType<Credentials>(request.Argument));
+                        LoginResultData rd = Controller.Instance.LoginFirstStep(_serializer.ReadType<Credentials>(request.Argument));
+                        response.Result = rd.LoginResult;
+                        UserId = rd.UserId;
                         break;
-                    case Operation.EnableTwoFactor:
+                    case Operation.EnableTwoFactorInit:
+                        response.Result = Controller.Instance.EnableTwoFaInit(UserId);
+                        break;
+                    case Operation.EnableTwoFactorConfirm:
+                        response.Result = Controller.Instance.EnableTwoFaConfirm(UserId, _serializer.ReadType<string>(request.Argument));
                         break;
                     case Operation.LoginSecondStep:
+                        response.Result = Controller.Instance.LoginSecondStep(_serializer.ReadType<Credentials>(request.Argument));
                         break;
                     case Operation.UseBackupCode:
                         break;

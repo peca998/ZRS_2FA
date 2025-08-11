@@ -48,6 +48,18 @@ namespace DBBroker
             }
             return null;
         }
+        public User? GetUserById(long userId)
+        {
+            string cmdText = $"SELECT * FROM Users WHERE UserId = @UserId";
+            using SqlCommand cmd = _dbConnection.CreateCommand(cmdText);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            using SqlDataReader reader = cmd.ExecuteReader();
+            if (reader.Read())
+            {
+                return User.ReadFromReader(reader);
+            }
+            return null;
+        }
         public (int attemptCount, DateTime? lastFailedAttempt) GetLoginAttempts(long userId, DateTime sinceTime)
         {
             const string cmdText = @"
@@ -74,6 +86,32 @@ namespace DBBroker
             {
                 return (0, null);
             }
+        }
+
+        public void SetTwoFaSecret(long userId, string secret)
+        {
+            const string cmdText = "UPDATE Users SET TwoFaSecretKey = @Secret WHERE UserId = @UserId";
+            using SqlCommand cmd = _dbConnection.CreateCommand(cmdText);
+            cmd.Parameters.AddWithValue("@Secret", secret);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.ExecuteNonQuery();
+        }
+
+        public string? GetTwoFaSecret(long userId)
+        {
+            const string cmdText = "SELECT TwoFaSecretKey FROM Users WHERE UserId = @UserId";
+            using SqlCommand cmd = _dbConnection.CreateCommand(cmdText);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            return cmd.ExecuteScalar() as string;
+        }
+
+        public void SetTwoFaEnabled(long userId, bool enabled)
+        {
+            const string cmdText = "UPDATE Users SET TwoFactorEnabled = @Enabled WHERE UserId = @UserId";
+            using SqlCommand cmd = _dbConnection.CreateCommand(cmdText);
+            cmd.Parameters.AddWithValue("@Enabled", enabled);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.ExecuteNonQuery();
         }
 
         public void Insert(IEntity e)

@@ -8,7 +8,9 @@ namespace Common.Communication
 {
     public enum LoginResult
     {
-        Success,
+        SuccessOneStep,
+        SuccessTwoFa,
+        SuccessBackup,
         TwoFactorRequired,
         UserNotFound,
         WrongPassword,

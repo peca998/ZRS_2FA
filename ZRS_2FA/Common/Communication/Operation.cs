@@ -10,7 +10,8 @@ namespace Common.Communication
     {
         Register,
         LoginFirstStep,
-        EnableTwoFactor,
+        EnableTwoFactorInit,
+        EnableTwoFactorConfirm,
         LoginSecondStep,
         UseBackupCode
     };

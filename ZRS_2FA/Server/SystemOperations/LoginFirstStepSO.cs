@@ -6,20 +6,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Server.SystemOperations.Utils;
 
 namespace Server.SystemOperations
 {
     public class LoginFirstStepSO : SystemOperationBase
     {
         public Credentials Credentials { get; set; }
-        public LoginResult Result { get; set; } = LoginResult.WrongPassword;
-        private const int TimeoutSeconds = 30;
-        private const int AllowedAttempts = 3;
-        private readonly TimeSpan LookbackPeriod = TimeSpan.FromMinutes(5);
+        public LoginResultData Result { get; set; }
 
         public LoginFirstStepSO(Credentials c)
         {
             Credentials = c;
+            Result = new LoginResultData
+            {
+                LoginResult = LoginResult.UserNotFound,
+                UserId = -1
+            };
         }
         public override void Execute()
         {
@@ -34,55 +37,33 @@ namespace Server.SystemOperations
                 AttemptType = LoginAttemptType.Password
             };
 
-            if (!IsLoginAllowed(existingUser.Id))
+            if (!Utils.Utils.IsLoginAllowed(existingUser.Id, _broker))
             {
-                Result = LoginResult.InTimeout;
+                Result.LoginResult = LoginResult.InTimeout;
                 _broker.Insert(attempt);
                 return;
             }
 
             if (!PasswordHasher.VerifyPassword(Credentials.Password, existingUser.Salt, existingUser.HashedPassword))
             {
-                Result = LoginResult.WrongPassword;
+                Result.LoginResult = LoginResult.WrongPassword;
                 _broker.Insert(attempt);
                 return;
             }
 
             attempt.Success = true;
+            Result.UserId = existingUser.Id;
+            Result.LoginResult = LoginResult.SuccessOneStep;
+            _broker.Insert(attempt);
             if (!existingUser.TwoFactorEnabled)
             {
-                Result = LoginResult.Success;
-                _broker.Insert(attempt);
                 return;
             }
             else
             {
-                Result = LoginResult.TwoFactorRequired;
-                attempt.AttemptType = LoginAttemptType.TwoFactor;
-                _broker.Insert(attempt);
+                Result.LoginResult = LoginResult.TwoFactorRequired;
                 return;
             }
-        }
-
-        public bool IsLoginAllowed(long userId)
-        {
-            DateTime lookbackStart = DateTime.UtcNow - LookbackPeriod;
-            (int attempts, DateTime? lastAttempt) = _broker.GetLoginAttempts(userId, lookbackStart);
-
-            if (attempts >= AllowedAttempts)
-            {
-                if (lastAttempt.HasValue)
-                {
-                    TimeSpan timeSinceLastAttempt = DateTime.UtcNow - lastAttempt.Value;
-                    if (timeSinceLastAttempt.TotalSeconds < TimeoutSeconds)
-                    {
-                        // User is still in timeout lockout period
-                        return false;
-                    }
-                }
-            }
-
-            return true;
         }
 
     }

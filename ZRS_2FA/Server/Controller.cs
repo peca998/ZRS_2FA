@@ -26,13 +26,13 @@ namespace Server
             so.ExecuteTemplate();
         }
 
-        public LoginResult LoginFirstStep(Credentials c)
+        public LoginResultData LoginFirstStep(Credentials c)
         {
             LoginFirstStepSO so = new(c);
             so.ExecuteTemplate();
-            switch (so.Result)
+            switch (so.Result.LoginResult)
             {
-                case LoginResult.Success:
+                case LoginResult.SuccessOneStep:
                     break;
                 case LoginResult.TwoFactorRequired:
                     break;
@@ -40,8 +40,38 @@ namespace Server
                     throw new InvalidOperationException("User does not exist!");
                 case LoginResult.WrongPassword:
                     throw new InvalidOperationException("Wrong password!");
-                case LoginResult.WrongTwoFactorCode:
+                case LoginResult.InTimeout:
+                    throw new InvalidOperationException("Too many failed attempts, try again later.");
+                default:
                     break;
+            }
+            return so.Result;
+        }
+
+        public string EnableTwoFaInit(long userId)
+        {
+            EnableTwoFaInitSO so = new(userId);
+            so.ExecuteTemplate();
+            return so.Result;
+        }
+
+        public bool EnableTwoFaConfirm(long userId, string code)
+        {
+            EnableTwoFaConfirmSO so = new(userId, code);
+            so.ExecuteTemplate();
+            return so.Result;
+        }
+
+        public LoginResult LoginSecondStep(Credentials c)
+        {
+            LoginSecondStep so = new(c);
+            so.ExecuteTemplate();
+            switch (so.Result)
+            {
+                case LoginResult.SuccessTwoFa:
+                    break;
+                case LoginResult.WrongTwoFactorCode:
+                    throw new InvalidOperationException("Wrong two-factor code!");
                 case LoginResult.InTimeout:
                     throw new InvalidOperationException("Too many failed attempts, try again later.");
                 default:

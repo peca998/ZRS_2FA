@@ -55,7 +55,7 @@ namespace Client
             return response.ErrorMessage;
         }
 
-        public async Task<(string?, LoginResult)> Login(string username, string password)
+        public async Task<(string?, LoginResult)> LoginFirstStep(string username, string password)
         {
             Credentials credentials = new()
             {
@@ -78,6 +78,79 @@ namespace Client
                 response.Result = LoginResult.WrongPassword;
             }
             return (response.ErrorMessage, (LoginResult)response.Result);
+        }
+
+        public async Task<string?> EnableTwoFaInit()
+        {
+            Request request = new()
+            {
+                Operation = Operation.EnableTwoFactorInit,
+                Argument = String.Empty
+            };
+            await _serializer.SendAsync(request);
+            Response response = await _serializer.ReceiveAsync<Response>();
+            if (response.ErrorMessage != null)
+            {
+                MessageBox.Show(response.ErrorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+            if (response.Result == null)
+            {
+                MessageBox.Show("Unexpected response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+            return _serializer.ReadType<string>(response.Result);
+        }
+
+        public async Task<bool> EnableTwoFaConfirm(string code)
+        {
+            Request request = new()
+            {
+                Operation = Operation.EnableTwoFactorConfirm,
+                Argument = code
+            };
+            await _serializer.SendAsync(request);
+            Response response = await _serializer.ReceiveAsync<Response>();
+            if (response.ErrorMessage != null)
+            {
+                MessageBox.Show(response.ErrorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            if(response.Result != null)
+            {
+                response.Result = _serializer.ReadType<bool>(response.Result);
+            }
+            else
+            {
+                return false;
+            }
+            return response.Result != null && (bool)response.Result;
+        }
+
+        public async Task<(string?, LoginResult)> LoginSecondStep(string username, string code)
+        {
+            Credentials credentials = new()
+            {
+                Username = username,
+                Password = code
+            };
+            Request request = new()
+            {
+                Operation = Operation.LoginSecondStep,
+                Argument = credentials
+            };
+            await _serializer.SendAsync(request);
+            Response response = await _serializer.ReceiveAsync<Response>();
+            LoginResult r;
+            if (response.Result != null)
+            {
+                r = _serializer.ReadType<LoginResult>(response.Result);
+            }
+            else
+            {
+                r = LoginResult.InTimeout;
+            }
+            return (response.ErrorMessage, r);
         }
     }
 }
