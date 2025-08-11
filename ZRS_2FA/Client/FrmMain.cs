@@ -17,7 +17,6 @@ namespace Client
             InitializeComponent();
             PbQr.SizeMode = PictureBoxSizeMode.StretchImage;
             PnlVerify.Visible = false;
-            BtnEnableTwoFa.Click += GuiController.MainController.Instance.EnableTwoFaInit;
             BtnOk.Click += GuiController.MainController.Instance.BtnOk_Click;
             RtxtBackupCodes.Visible = false;
             LblBackupCodes.Visible = false;

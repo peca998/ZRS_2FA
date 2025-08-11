@@ -140,6 +140,14 @@ namespace DBBroker
             cmd.ExecuteNonQuery();
         }
 
+        public void InvalidateBackupCodes(long userId)
+        {
+            const string cmdText = "UPDATE BackupCodes SET IsUsed = 1 WHERE UserId = @UserId";
+            using SqlCommand cmd = _dbConnection.CreateCommand(cmdText);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.ExecuteNonQuery();
+        }
+
         public void Insert(IEntity e)
         {
             string keys = string.Join(", ", e.GetInsertValues().Keys);

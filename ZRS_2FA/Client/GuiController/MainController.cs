@@ -24,14 +24,15 @@ namespace Client.GuiController
             switch (lr)
             {
                 case LoginResult.SuccessOneStep:
+                    _form.BtnEnableTwoFa.Click += EnableTwoFaInit;
                     break;
                 case LoginResult.SuccessTwoFa:
                     _form.BtnEnableTwoFa.Enabled = false;
                     _form.BtnEnableTwoFa.Text = "2FA Enabled";
                     break;
                 case LoginResult.SuccessBackup:
-                    _form.BtnEnableTwoFa.Enabled = false;
-                    _form.BtnEnableTwoFa.Text = "2FA Enabled";
+                    _form.BtnEnableTwoFa.Text = "Regenerate 2FA";
+                    _form.BtnEnableTwoFa.Click += RegenerateTwoFaInit;
                     break;
                 default:
                     break;
@@ -40,13 +41,31 @@ namespace Client.GuiController
         }
         public async void EnableTwoFaInit(object? o, EventArgs e)
         {
-            string? qrBase64 = await Communication.Instance.EnableTwoFaInit();
+            string? qrBase64 = await Communication.Instance.EnableTwoFaInit(false);
             if(qrBase64 == null)
             {
                 return;
             }
             _form.PbQr.Image = ConvertToQrImage(qrBase64);
+            SetupConfirmationPanel();
+        }
+
+        public async void RegenerateTwoFaInit(object? o, EventArgs e)
+        {
+            string? qrBase64 = await Communication.Instance.EnableTwoFaInit(true);
+            if (qrBase64 == null)
+            {
+                return;
+            }
+            SetupConfirmationPanel();
+        }
+
+        public void SetupConfirmationPanel()
+        {
             _form.PnlVerify.Visible = true;
+            _form.PbQr.Visible = true;
+            _form.TxtCode.Focus();
+            _form.AcceptButton = _form.BtnOk;
         }
 
         public Image ConvertToQrImage(string qrBase64)

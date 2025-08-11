@@ -111,7 +111,8 @@ namespace Server
                         UserId = rd.UserId;
                         break;
                     case Operation.EnableTwoFactorInit:
-                        response.Result = Controller.Instance.EnableTwoFaInit(UserId);
+                        bool regenerate = _serializer.ReadType<bool>(request.Argument);
+                        response.Result = Controller.Instance.EnableTwoFaInit(UserId, regenerate);
                         break;
                     case Operation.EnableTwoFactorConfirm:
                         response.Result = Controller.Instance.EnableTwoFaConfirm(UserId, _serializer.ReadType<string>(request.Argument));

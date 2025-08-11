@@ -48,9 +48,9 @@ namespace Server
             return so.Result;
         }
 
-        public string EnableTwoFaInit(long userId)
+        public string EnableTwoFaInit(long userId, bool regenerate)
         {
-            EnableTwoFaInitSO so = new(userId);
+            EnableTwoFaInitSO so = new(userId, regenerate);
             so.ExecuteTemplate();
             return so.Result;
         }

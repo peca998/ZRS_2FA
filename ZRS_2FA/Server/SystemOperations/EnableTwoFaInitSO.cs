@@ -11,14 +11,21 @@ namespace Server.SystemOperations
     public class EnableTwoFaInitSO : SystemOperationBase
     {
         public long UserId { get; set; }
+        public bool Regenerate { get; set; }
         public string Result { get; set; }
-        public EnableTwoFaInitSO(long userId)
+        public EnableTwoFaInitSO(long userId, bool regenerate)
         {
             UserId = userId;
+            Regenerate = regenerate;
         }
         public override void Execute()
         {
             User? u = _broker.GetUserById(UserId) ?? throw new InvalidOperationException("User does not exist!");
+            if (Regenerate)
+            {
+                // invalidate old backup codes (set them as used)
+                _broker.InvalidateBackupCodes(UserId);
+            }
             string secretKey = TwoFaHelper.GenerateSecret();
             _broker.SetTwoFaSecret(UserId, secretKey);
             string url = TwoFaHelper.GenerateQrCodeUrl(secretKey, u.Username);

@@ -23,7 +23,6 @@ namespace Client
         }
         public bool Connnect()
         {
-            //return true;
             try
             {
                 _client = new();
@@ -80,12 +79,12 @@ namespace Client
             return (response.ErrorMessage, (LoginResult)response.Result);
         }
 
-        public async Task<string?> EnableTwoFaInit()
+        public async Task<string?> EnableTwoFaInit(bool regenerate)
         {
             Request request = new()
             {
                 Operation = Operation.EnableTwoFactorInit,
-                Argument = String.Empty
+                Argument = regenerate
             };
             await _serializer.SendAsync(request);
             Response response = await _serializer.ReceiveAsync<Response>();

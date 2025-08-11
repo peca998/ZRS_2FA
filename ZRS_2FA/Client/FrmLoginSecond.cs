@@ -18,6 +18,14 @@ namespace Client
             InitializeComponent();
             BtnOkCode.Click += LoginController.Instance.LoginUserSecondStep;
             BtnBackupOk.Click += LoginController.Instance.LoginUserBackupCode;
+            TxtCode.GotFocus += (s, e) =>
+            {
+                AcceptButton = BtnOkCode;
+            };
+            TxtBackup.GotFocus += (s, e) =>
+            {
+                AcceptButton = BtnBackupOk;
+            };
         }
     }
 }
